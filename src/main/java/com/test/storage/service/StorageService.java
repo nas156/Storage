@@ -36,10 +36,6 @@ public class StorageService {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public List<StoredFile> getAllStoredFiles() {
-        return storageRepository.findAll();
-    }
-
     public UploadFileResponseDTO uploadFile(UploadFileRequestDTO fileToUpload) {
         Set<String> tags = new HashSet<>();
         tags.add(getFileTagsBasedOnType(fileToUpload.getName()));

@@ -26,11 +26,6 @@ public class StorageController {
         this.storageService = storageService;
     }
 
-    @GetMapping(value = "/all")
-    public List<StoredFile> getAll() {
-        return storageService.getAllStoredFiles();
-    }
-
     @PostMapping
     public UploadFileResponseDTO uploadFile(@RequestBody @Valid UploadFileRequestDTO fileToUpload) {
         return storageService.uploadFile(fileToUpload);
