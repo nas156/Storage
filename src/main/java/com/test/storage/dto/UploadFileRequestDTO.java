@@ -11,7 +11,7 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 public class UploadFileRequestDTO {
 
-    @Pattern(regexp = "^[\\w]+[\\w|\\s-]*\\.[A-Za-z0-9]+$", message = "name of file must be like name.ext")
+    @Pattern(regexp = "^[\\wА-Яа-яі]+[\\wА-Яа-яі|\\s-]*\\.[A-Za-z0-9]+$", message = "wrong file name format, should be name.ext")
     @NotEmpty(message = "name of file must not be empty")
     private String name;
 
