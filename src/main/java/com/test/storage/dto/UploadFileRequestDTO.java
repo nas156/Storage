@@ -18,7 +18,7 @@ public class UploadFileRequestDTO {
     @NotNull(message = "name of file must not be null")
     private String name;
 
-    @Min(value = 0, message = "size of file must not be less then 0")
+    @Min(value = 0, message = "size of file must not be less than 0")
     @NotNull(message = "size of file must not be null")
     private Long size;
 

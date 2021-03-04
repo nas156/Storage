@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class FileTypeUtil {
 
-    private final static String[] EXPECTED_TYPES = {"audio", "video", "text", "document", "image"};
+    private final static String[] EXPECTED_TYPES = {"audio", "video", "text", "image"};
 
     private FileTypeUtil() {
 
@@ -23,7 +23,6 @@ public class FileTypeUtil {
     private static String getFileTagsBasedOnExt(String fileExt) {
         // provided string is like type/format
         String fileType = new Tika().detect(fileExt).replaceAll("/.*", "");
-        System.out.println(fileType);
         return Arrays.asList(EXPECTED_TYPES).contains(fileType) ? fileType : null;
     }
 

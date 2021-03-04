@@ -11,10 +11,8 @@ import com.test.storage.repository.StorageRepository;
 import com.test.storage.util.FileTypeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -23,12 +21,10 @@ import java.util.Set;
 public class StorageService {
 
     final StorageRepository storageRepository;
-    final ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
-    public StorageService(StorageRepository storageRepository, ElasticsearchOperations elasticsearchOperations) {
+    public StorageService(StorageRepository storageRepository) {
         this.storageRepository = storageRepository;
-        this.elasticsearchOperations = elasticsearchOperations;
     }
 
     public UploadFileResponseDTO uploadFile(UploadFileRequestDTO fileToUpload) {
