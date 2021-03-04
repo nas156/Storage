@@ -8,6 +8,7 @@ import com.test.storage.exception.custom.FileNotFoundException;
 import com.test.storage.exception.custom.TagNotFoundOnFileException;
 import com.test.storage.model.StoredFile;
 import com.test.storage.repository.StorageRepository;
+import com.test.storage.util.FileTypeUtil;
 import org.apache.tika.Tika;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,8 +39,8 @@ public class StorageService {
     }
 
     public UploadFileResponseDTO uploadFile(UploadFileRequestDTO fileToUpload) {
-        Set<String> tags = new HashSet<>();
-        tags.add(getFileTagsBasedOnType(fileToUpload.getName()));
+        Set<String> tags = new LinkedHashSet<>();
+        FileTypeUtil.getTypeOfFileByName(fileToUpload.getName()).map(tags::add);
         StoredFile storedFile = storageRepository.save(StoredFile.builder()
                 .fileSize(fileToUpload.getSize())
                 .fileName(fileToUpload.getName())
@@ -47,11 +49,7 @@ public class StorageService {
         return new UploadFileResponseDTO(storedFile.getId());
     }
 
-    private String getFileTagsBasedOnType(String fileName) {
-        String fileType = new Tika().detect(fileName);
-        // provided string is like type/format
-        return fileType.split("/")[0];
-    }
+
 
     public ResponseWithSuccessDTO deleteFileById(String id) {
         var file = storageRepository.findById(id).orElseThrow(() -> new FileNotFoundException(id));
@@ -74,7 +72,9 @@ public class StorageService {
 
         var filterQuery = QueryBuilders.boolQuery();
         tags.forEach(tag -> filterQuery.must(QueryBuilders.termQuery("tags", tag)));
-        filterQuery.must(QueryBuilders.wildcardQuery("filename", prepareStringForSearch(nameFilter)));
+        if (!nameFilter.isEmpty()) {
+            filterQuery.must(QueryBuilders.wildcardQuery("filename", prepareStringForSearch(nameFilter)));
+        }
 
         Query searchQuery = new NativeSearchQueryBuilder()
                 .withFilter(filterQuery)
