@@ -4,14 +4,12 @@ import com.test.storage.dto.FilteredPagedSearchResponseDTO;
 import com.test.storage.dto.ResponseWithSuccessDTO;
 import com.test.storage.dto.UploadFileRequestDTO;
 import com.test.storage.dto.UploadFileResponseDTO;
-import com.test.storage.model.StoredFile;
 import com.test.storage.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
