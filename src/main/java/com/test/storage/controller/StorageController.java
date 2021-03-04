@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ public class StorageController {
             @RequestParam Optional<Set<String>> tags,
             @RequestParam(defaultValue = "", value = "q") String nameFilter) {
 
-        return storageService.filteredAndPagedSearch(tags.orElse(new HashSet<>()), page, size, nameFilter);
+        return storageService.filteredAndPagedSearch(tags, page, size, nameFilter);
     }
 
     @DeleteMapping("/{ID}/tags")

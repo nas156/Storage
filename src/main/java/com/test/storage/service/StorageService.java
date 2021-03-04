@@ -9,22 +9,15 @@ import com.test.storage.exception.custom.TagNotFoundOnFileException;
 import com.test.storage.model.StoredFile;
 import com.test.storage.repository.StorageRepository;
 import com.test.storage.util.FileTypeUtil;
-import org.apache.tika.Tika;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class StorageService {
@@ -50,7 +43,6 @@ public class StorageService {
     }
 
 
-
     public ResponseWithSuccessDTO deleteFileById(String id) {
         var file = storageRepository.findById(id).orElseThrow(() -> new FileNotFoundException(id));
         storageRepository.delete(file);
@@ -65,37 +57,18 @@ public class StorageService {
     }
 
     public FilteredPagedSearchResponseDTO filteredAndPagedSearch(
-            Set<String> tags,
+            Optional<Set<String>> tags,
             Integer page,
             Integer size,
             String nameFilter) {
 
-        var filterQuery = QueryBuilders.boolQuery();
-        tags.forEach(tag -> filterQuery.must(QueryBuilders.termQuery("tags", tag)));
-        if (!nameFilter.isEmpty()) {
-            filterQuery.must(QueryBuilders.wildcardQuery("filename", prepareStringForSearch(nameFilter)));
-        }
+        // can`t avoid empty tags set
+        var filesPage = tags
+                .map(tag -> storageRepository
+                        .findAllByTagsAndFileNameContaining(tag, nameFilter, PageRequest.of(page, size)))
+                .orElse(storageRepository.findAllByFileNameContaining(nameFilter, PageRequest.of(page, size)));
 
-        Query searchQuery = new NativeSearchQueryBuilder()
-                .withFilter(filterQuery)
-                .withPageable(PageRequest.of(page, size))
-                .build();
-
-        var total = elasticsearchOperations.count(searchQuery, StoredFile.class);
-        SearchHits<StoredFile> searchSuggestions =
-                elasticsearchOperations.search(searchQuery,
-                        StoredFile.class);
-
-        var files = searchSuggestions
-                .stream()
-                .map(SearchHit::getContent)
-                .collect(Collectors.toList());
-
-        return new FilteredPagedSearchResponseDTO(total, files);
-    }
-
-    private String prepareStringForSearch(String stringToPrepare) {
-        return String.format("*%s*.*", stringToPrepare);
+        return new FilteredPagedSearchResponseDTO(filesPage.getTotalElements(), filesPage.getContent());
     }
 
     public ResponseWithSuccessDTO deleteTagsFromFileById(String id, Set<String> tags) {
